@@ -109,7 +109,7 @@ Token API generujesz sam: Toggl Track → avatar (Profile) → Profile settings 
 
 ## Claude (MCP)
 
-Claude Code albo Claude Desktop może wpisywać wiersze dnia za Ciebie, np. gdy prosisz go o podsumowanie dnia z historii pracy. Serwer MCP działa w kontenerze i rozmawia z Claude przez `docker exec`, więc nie otwiera żadnego portu.
+Claude Code albo Claude Desktop może wpisywać wiersze dnia za Ciebie, np. gdy prosisz go o podsumowanie dnia z historii pracy. Serwer MCP działa w kontenerze i rozmawia z Claude przez `docker exec`, więc nie otwiera żadnego portu. Protokół obsługuje oficjalne SDK `mcp/sdk`; narzędzia są w `src/Mcp`.
 
 Claude Code:
 
@@ -194,6 +194,7 @@ Całkowite usunięcie: `./worklog uninstall`. Usuwa kontener, obraz, wolumen z d
 | Doctrine ORM / DBAL | ^3.7 / ^4.3 |
 | DoctrineBundle | ^3.3 |
 | Twig | ^3.21 |
+| MCP SDK (`mcp/sdk`) | ^0.10 – oficjalne SDK (PHP Foundation i Symfony), na razie eksperymentalne |
 
 Dokładne wersje pakietów są przypięte w `composer.lock` – `./worklog update` podnosi je do najnowszych łatek w ramach `composer.json` i przebudowuje obraz.
 
