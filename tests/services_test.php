@@ -962,7 +962,7 @@ namespace {
         ['ticket' => 'XYZ-2', 'minutes' => 15],
     ]), [
         ['key' => 'ABC-9', 'minutes' => 90, 'description' => 'Eksport CSV', 'title' => 'Raporty miesięczne'],
-        ['key' => 'XYZ-2', 'minutes' => 15, 'description' => '', 'title' => null],
+        ['key' => 'XYZ-2', 'minutes' => 15, 'description' => '', 'title' => ''],
     ]);
     check('MCP: błędy wszystkich wpisów naraz', $parseError([
         ['ticket' => 'bez numeru', 'minutes' => 30],

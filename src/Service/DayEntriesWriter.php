@@ -31,11 +31,12 @@ final class DayEntriesWriter
                 $errors[] = sprintf('Wpis %d: oczekiwano obiektu z polami ticket, minutes, description.', $n);
                 continue;
             }
+            $errorsBefore = count($errors);
             $ticket = is_string($raw['ticket'] ?? null) ? trim($raw['ticket']) : '';
             $key = Template::extractIssueKey($ticket);
             $minutes = filter_var($raw['minutes'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => self::MAX_MINUTES]]);
             $description = $raw['description'] ?? '';
-            $title = $raw['title'] ?? null;
+            $title = $raw['title'] ?? Template::issueTitleAfterKey($ticket);
 
             if (null === $key) {
                 $errors[] = sprintf('Wpis %d: niepoprawny numer ticketu „%s” (np. ABC-123).', $n, $ticket);
@@ -46,20 +47,14 @@ final class DayEntriesWriter
             if (!is_string($description)) {
                 $errors[] = sprintf('Wpis %d: description musi być tekstem.', $n);
             }
-            if (null !== $title && !is_string($title)) {
+            if (!is_string($title)) {
                 $errors[] = sprintf('Wpis %d: title musi być tekstem.', $n);
             }
-            if (null === $key || false === $minutes || !is_string($description) || (null !== $title && !is_string($title))) {
+            if (count($errors) > $errorsBefore) {
                 continue;
             }
 
-            $title = trim($title ?? Template::issueTitleAfterKey($ticket));
-            $rows[] = [
-                'key' => $key,
-                'minutes' => $minutes,
-                'description' => trim($description),
-                'title' => '' !== $title ? $title : null,
-            ];
+            $rows[] = ['key' => $key, 'minutes' => $minutes, 'description' => trim($description), 'title' => trim($title)];
         }
 
         if ([] !== $errors) {
@@ -72,23 +67,27 @@ final class DayEntriesWriter
     public function replace(WorkDay $day, array $rows): void
     {
         $free = $day->getActiveEntries();
-        foreach ($free as $entry) {
-            if ($entry->isTimerRunning()) {
-                throw new \InvalidArgumentException(sprintf('Przy tickecie %s działa stoper – zatrzymaj go w aplikacji i spróbuj ponownie.', $entry->getIssueKey()));
-            }
+        $timed = array_find($free, static fn (WorklogEntry $e): bool => $e->isTimerRunning());
+        if (null !== $timed) {
+            throw new \InvalidArgumentException(sprintf('Przy tickecie %s działa stoper – zatrzymaj go w aplikacji i spróbuj ponownie.', $timed->getIssueKey()));
         }
 
         $knownTitles = null;
         foreach ($rows as $position => $row) {
-            $entry = self::claim($free, $row);
-            if (null === $entry) {
+            $sameTicket = static fn (WorklogEntry $e): bool => $e->getIssueKey() === $row['key'];
+            $i = array_find_key($free, static fn (WorklogEntry $e): bool => $sameTicket($e) && $e->getDescription() === $row['description'])
+                ?? array_find_key($free, $sameTicket);
+
+            if (null === $i) {
                 $entry = new WorklogEntry($day, $row['key'], $row['minutes'], $row['description'], $position);
             } else {
+                $entry = $free[$i];
+                unset($free[$i]);
                 $entry->update($row['key'], $row['minutes'], $row['description'], $position);
             }
             $entry->setStartClock(null);
 
-            $title = $row['title'] ?? $entry->getIssueTitle();
+            $title = $row['title'] ?: $entry->getIssueTitle();
             if ('' === $title) {
                 $knownTitles ??= $this->days->knownIssueTitles() + $this->settings->issueCache();
                 $title = $knownTitles[$row['key']] ?? '';
@@ -99,20 +98,5 @@ final class DayEntriesWriter
         foreach ($free as $entry) {
             $entry->isInJira() ? $entry->markDeleted() : $day->removeEntry($entry);
         }
-    }
-
-    private static function claim(array &$free, array $row): ?WorklogEntry
-    {
-        foreach ([true, false] as $sameDescription) {
-            foreach ($free as $i => $entry) {
-                if ($entry->getIssueKey() === $row['key'] && (!$sameDescription || $entry->getDescription() === $row['description'])) {
-                    unset($free[$i]);
-
-                    return $entry;
-                }
-            }
-        }
-
-        return null;
     }
 }

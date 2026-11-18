@@ -125,7 +125,7 @@ Claude Desktop (`claude_desktop_config.json`):
 
 Narzędzia:
 
-- `get_day` – wpisy dnia (ticket, tytuł, czas, opis, stan w Jirze), suma, norma i czy to dzień wolny.
+- `get_day` – wpisy dnia (ticket, tytuł, minuty, opis, stan w Jirze), suma i norma w minutach, czy to dzień wolny.
 - `set_day` – zastępuje wszystkie wpisy dnia podaną listą (ticket, minuty, opis, opcjonalnie tytuł). Wiersz z tym samym ticketem zostaje przy swoim worklogu w Jirze, a usunięte wiersze, które były już w Jirze, znikną z niej przy następnej wysyłce. Godzina „od” zapisanych wierszy jest czyszczona.
 
 Claude niczego nie wysyła do Jiry ani na Slacka: otwierasz dzień w aplikacji, sprawdzasz wiersze i klikasz „Zapisz i wyślij do Jiry”. Stronę dnia otwartą przed zapisem przez Claude przeładuj, zanim coś w niej zmienisz – inaczej autozapis przywróci jej stare wiersze. Przy działającym stoperze zapis jest odrzucany.
