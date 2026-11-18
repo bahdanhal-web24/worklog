@@ -5,16 +5,16 @@ namespace App\Mcp;
 final readonly class DayView
 {
     public function __construct(
-        public private(set) string $date,
-        public private(set) string $weekday,
-        public private(set) ?string $dayOff,
-        public private(set) ?string $start,
-        public private(set) ?string $end,
-        public private(set) int $normMinutes,
-        public private(set) int $totalMinutes,
-        public private(set) array $entries,
-        public private(set) int $pendingJiraDeletions,
-        public private(set) bool $jiraConfigured,
+        private(set) string $date,
+        private(set) string $weekday,
+        private(set) ?string $dayOff,
+        private(set) ?string $start,
+        private(set) ?string $end,
+        private(set) int $normMinutes,
+        private(set) int $totalMinutes,
+        private(set) array $entries,
+        private(set) int $pendingJiraDeletions,
+        private(set) bool $jiraConfigured,
     ) {
     }
 }
