@@ -5,10 +5,10 @@ namespace App\Domain;
 final readonly class EntryInput
 {
     public function __construct(
-        public string $issueKey,
-        public int $minutes,
-        public string $description = '',
-        public string $title = '',
+        public private(set) string $issueKey,
+        public private(set) int $minutes,
+        public private(set) string $description = '',
+        public private(set) string $title = '',
     ) {
     }
 

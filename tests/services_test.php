@@ -41,9 +41,12 @@ namespace Symfony\Contracts\HttpClient\Exception {
 }
 
 namespace {
+    use App\Domain\EntryInput;
     use App\Entity\PlannedChange;
     use App\Entity\WorkDay;
     use App\Entity\WorklogEntry;
+    use App\Repository\WorkDayRepository;
+    use App\Service\DayEntriesWriter;
     use App\Service\JiraClient;
     use App\Service\ReportBuilder;
     use App\Service\Settings;
@@ -932,27 +935,27 @@ namespace {
     }
     @rmdir($dir);
 
-    $writerRepo = new class extends App\Repository\WorkDayRepository {
+    $titlesRepository = new class extends WorkDayRepository {
         public function __construct() {}
         public function knownIssueTitles(?\DateTimeImmutable $since = null): array { return ['ABC-9' => 'Moduł raportów', 'ABC-1' => 'Stary tytuł']; }
     };
-    $writer = new App\Service\DayEntriesWriter($writerRepo, $settings);
-    $inputs = static fn (array $entries): array => array_map(App\Domain\EntryInput::fromArray(...), $entries);
-    $byPosition = static function (WorkDay $d): array {
-        $entries = $d->getActiveEntries();
-        usort($entries, static fn (WorklogEntry $a, WorklogEntry $b): int => $a->getPosition() <=> $b->getPosition());
+    $writer = new DayEntriesWriter($titlesRepository, $settings);
+    $inputs = static fn (array $entries): array => array_map(EntryInput::fromArray(...), $entries);
+    $byPosition = static function (WorkDay $day): array {
+        $entries = $day->getActiveEntries();
+        usort($entries, static fn (WorklogEntry $left, WorklogEntry $right): int => $left->getPosition() <=> $right->getPosition());
 
         return $entries;
     };
-    $rowsOf = static fn (WorkDay $d): array => array_map(
-        static fn (WorklogEntry $e): array => [$e->getIssueKey(), $e->getMinutes(), $e->getDescription(), $e->getIssueTitle(), $e->getPosition()],
-        $byPosition($d),
+    $rowsOf = static fn (WorkDay $day): array => array_map(
+        static fn (WorklogEntry $entry): array => [$entry->getIssueKey(), $entry->getMinutes(), $entry->getDescription(), $entry->getIssueTitle(), $entry->getPosition()],
+        $byPosition($day),
     );
     $domainError = static function (callable $action): string {
         try {
             $action();
-        } catch (DomainException $e) {
-            return $e->getMessage();
+        } catch (DomainException $exception) {
+            return $exception->getMessage();
         }
 
         return '';

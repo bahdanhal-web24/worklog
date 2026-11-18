@@ -18,7 +18,7 @@ final readonly class DayEntriesWriter
 
     public function replace(WorkDay $day, array $inputs): void
     {
-        $running = array_find($day->getActiveEntries(), static fn (WorklogEntry $e): bool => $e->isTimerRunning());
+        $running = array_find($day->getActiveEntries(), static fn (WorklogEntry $entry): bool => $entry->isTimerRunning());
         if (null !== $running) {
             throw new \DomainException(sprintf('Przy tickecie %s działa stoper – zatrzymaj go w aplikacji i spróbuj ponownie.', $running->getIssueKey()));
         }
@@ -32,7 +32,7 @@ final readonly class DayEntriesWriter
             $entry->setIssueTitle($input->title ?: $entry->getIssueTitle() ?: $titles[$input->issueKey] ?? '');
         }
 
-        foreach ($reusable->left() as $entry) {
+        foreach ($reusable->remaining() as $entry) {
             $entry->isInJira() ? $entry->markDeleted() : $day->removeEntry($entry);
         }
     }

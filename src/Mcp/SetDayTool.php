@@ -40,7 +40,7 @@ final readonly class SetDayTool
     ];
 
     public function __construct(
-        private EntityManagerInterface $em,
+        private EntityManagerInterface $entityManager,
         private WorkDayRepository $days,
         private DayDefaults $defaults,
         private DayEntriesWriter $writer,
@@ -61,13 +61,13 @@ final readonly class SetDayTool
         $day ??= $this->defaults->newDay($dayDate);
         try {
             $this->writer->replace($day, array_map(EntryInput::fromArray(...), $entries));
-        } catch (\DomainException $e) {
-            throw new ToolCallException($e->getMessage(), previous: $e);
+        } catch (\DomainException $exception) {
+            throw new ToolCallException($exception->getMessage(), previous: $exception);
         }
 
-        $this->em->persist($day);
-        $this->em->flush();
-        $this->em->clear();
+        $this->entityManager->persist($day);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
         return $this->views->forDate($dayDate);
     }

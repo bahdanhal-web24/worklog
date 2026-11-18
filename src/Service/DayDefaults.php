@@ -38,10 +38,10 @@ final class DayDefaults
         return ['start' => $start, 'end' => $end, 'breakMinutes' => $this->settings->int('default_break')];
     }
 
-    public function newDay(\DateTimeImmutable $d): WorkDay
+    public function newDay(\DateTimeImmutable $date): WorkDay
     {
-        $defaults = $this->for($d);
-        $day = new WorkDay($d);
+        $defaults = $this->for($date);
+        $day = new WorkDay($date);
         $day->setStartTime($defaults['start']);
         $day->setEndTime($defaults['end']);
         $day->setBreakMinutes($defaults['breakMinutes']);

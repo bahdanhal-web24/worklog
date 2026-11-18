@@ -8,12 +8,12 @@ use App\Service\WorklogSync;
 final readonly class EntryView
 {
     public function __construct(
-        public string $ticket,
-        public string $title,
-        public int $minutes,
-        public string $description,
-        public string $jira,
-        public ?string $jiraError,
+        public private(set) string $ticket,
+        public private(set) string $title,
+        public private(set) int $minutes,
+        public private(set) string $description,
+        public private(set) string $jira,
+        public private(set) ?string $jiraError,
     ) {
     }
 

@@ -12,13 +12,13 @@ final class ReusableEntries
 
     public function takeFor(EntryInput $input): ?WorklogEntry
     {
-        $key = array_find_key($this->entries, static fn (WorklogEntry $e): bool => $e->getIssueKey() === $input->issueKey && $e->getDescription() === $input->description)
-            ?? array_find_key($this->entries, static fn (WorklogEntry $e): bool => $e->getIssueKey() === $input->issueKey);
+        $key = array_find_key($this->entries, static fn (WorklogEntry $entry): bool => $entry->getIssueKey() === $input->issueKey && $entry->getDescription() === $input->description)
+            ?? array_find_key($this->entries, static fn (WorklogEntry $entry): bool => $entry->getIssueKey() === $input->issueKey);
 
         return null === $key ? null : $this->take($key);
     }
 
-    public function left(): array
+    public function remaining(): array
     {
         return array_values($this->entries);
     }
